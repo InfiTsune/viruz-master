@@ -71,6 +71,18 @@ class APIStuff
 
 ```
 
+jaja crea un archivo en `/source/gamejolt` y llamalo `GJKeys.hx` y copia lo siguiente
+
+```haxe
+	package gamejolt;
+
+	class GJKeys
+	{
+		public static var id:Int = 0; // Your Game ID
+		public static var key:String = ''; // Your Game Private Key
+	}
+```
+
 and you should be good to go there.
 
 ### Compiling game
