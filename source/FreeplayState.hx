@@ -43,49 +43,34 @@ class FreeplayState extends MusicBeatState
 
 	override function create()
 	{
-		// var initSonglist = CoolUtil.coolTextFile(Paths.txt('freeplaySonglist'));
-
-		// for (i in 0...initSonglist.length)
-		// {
-		// 	songs.push(new SongMetadata(initSonglist[i], 1, 'gf'));
-		// }
-
-		/* 
-			if (FlxG.sound.music != null)
-			{
-				if (!FlxG.sound.music.playing)
-					FlxG.sound.playMusic(Paths.music('freakyMenu'));
-			}
-		 */
-
-		 #if desktop
-		 // Updating Discord Rich Presence
-		 DiscordClient.changePresence("In the Menus", null);
-		 #end
+		#if desktop
+		// Updating Discord Rich Presence
+		DiscordClient.changePresence("In the Freeplay", null);
+		#end
 
 		var isDebug:Bool = false;
 
 		#if debug
 		isDebug = true;
 		#end
-			addWeek(['Tutorial'], 1, ["gf"], [[255, 0, 85]]);
-			addWeek(['Bopeebo', 'Fresh', 'Dadbattle'], 1, ['dad'], [[159, 24, 221]]);
 
-			addWeek(['Spookeez', 'South', 'Monster'], 2, ['spooky', 'spooky', 'monster'], [[63, 42, 72]]);
+		addWeek(['Tutorial'], 1, ["gf"], [[255, 0, 85]]);
 
-			addWeek(['Pico', 'Philly', 'Blammed'], 3, ['pico'], [[92, 184, 116]]);
+		addWeek(['Bopeebo', 'Fresh', 'Dadbattle'], 1, ['dad'], [[159, 24, 221]]);
 
-			addWeek(['Satin-Panties', 'High', 'Milf'], 4, ['mom'], [[249, 168, 203]]);
+		addWeek(['Spookeez', 'South', 'Monster'], 2, ['spooky', 'spooky', 'monster'], [[63, 42, 72]]);
 
-			addWeek(['Cocoa', 'Eggnog', 'Winter-Horrorland'], 5, ['parents-christmas', 'parents-christmas', 'monster-christmas'], [[120, 235, 243], [120, 235, 243], [46, 78, 81]]);
+		addWeek(['Pico', 'Philly', 'Blammed'], 3, ['pico'], [[92, 184, 116]]);
 
-			addWeek(['Senpai', 'Roses', 'Thorns'], 6, ['senpai', 'senpai', 'spirit'], [[255, 173, 193]]);
+		addWeek(['Satin-Panties', 'High', 'Milf'], 4, ['mom'], [[249, 168, 203]]);
+
+		addWeek(['Cocoa', 'Eggnog', 'Winter-Horrorland'], 5, ['parents-christmas', 'parents-christmas', 'monster-christmas'], [[120, 235, 243], [120, 235, 243], [46, 78, 81]]);
+
+		addWeek(['Senpai', 'Roses', 'Thorns'], 6, ['senpai', 'senpai', 'spirit'], [[255, 173, 193]]);
 
 		// LOAD MUSIC
 
-		// LOAD CHARACTERS
-
-		bg = new FlxSprite().loadGraphic(Paths.image('viruz/menuViruzDesat'));
+		bg = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
 		bg.color = 0xFFFFFFFF;
 		add(bg);
 
@@ -110,7 +95,7 @@ class FreeplayState extends MusicBeatState
 			add(icon);
 
 			songText.x -= 40;
-			// DONT PUT X IN THE FIRST PARAMETER OF new ALPHABET() !!
+			// DONT PUT X IN THE FIRST PARAMETER OF new ALPHABET() !! JAJAJA EL IMBECIL
 			// songText.screenCenter(X);
 		}
 
@@ -141,33 +126,16 @@ class FreeplayState extends MusicBeatState
 
 		var swag:Alphabet = new Alphabet(1, 0, "swag");
 
-		// JUST DOIN THIS SHIT FOR TESTING!!!
-		/* 
-			var md:String = Markdown.markdownToHtml(Assets.getText('CHANGELOG.md'));
-
-			var texFel:TextField = new TextField();
-			texFel.width = FlxG.width;
-			texFel.height = FlxG.height;
-			// texFel.
-			texFel.htmlText = md;
-
-			FlxG.stage.addChild(texFel);
-
-			// scoreText.textField.htmlText = md;
-
-			trace(md);
-		 */
-
 		super.create();
 
 		//  me when
 		if (AGAIN_IN_FREEPLAY)
 		{
-			// grpSongs.forEach(function (ALPHABET:Alphabet) 
-			// {
-			// 	ALPHABET.instantYPos();
-			// });
-			// bg.color = FlxColor.fromRGB(songs[curSelected].color[0], songs[curSelected].color[1], songs[curSelected].color[2], 255);
+			grpSongs.forEach(function (ALPHABET:Alphabet) 
+			{
+				ALPHABET.instantYPos();
+			});
+			bg.color = FlxColor.fromRGB(songs[curSelected].color[0], songs[curSelected].color[1], songs[curSelected].color[2], 255);
 		}
 	}
 
@@ -179,7 +147,7 @@ class FreeplayState extends MusicBeatState
 	/**
 		add song lol
 
-		`songs` songs name "[dadbattle, tutorial]"
+		`songs` songs name "[Tutorial, Ugh]"
 
 		`weekNum` week level "1"
 
@@ -197,28 +165,17 @@ class FreeplayState extends MusicBeatState
 		var numC = 0;
 		for (song in songs)
 		{
-			// colors.push(colorsRGB[num]);
 			addSong(song, weekNum, songCharacters[num], colorsRGB[numC]);
 
 			if (songCharacters.length != 1)
 				num++;
-				// q imbecil
-				// if (colorsRGB[numC] != null) {
-				// 	numC++;
-				// }
-				// else {
-				// 	numC = 0;
-				// }
-				if (colorsRGB.length - 1 != 0) {
+
+				if (colorsRGB.length - 1 != 0) 
+				{
 					numC++;
 				}
 		}
 	}
-
-	// function addColors(so:Array<Dynamic>) {
-	// 	colors.push(so[0]);
-	// 	trace(colors);
-	// }
 
 	override function update(elapsed:Float)
 	{
@@ -238,7 +195,7 @@ class FreeplayState extends MusicBeatState
 
 		var upP = controls.UP_P;
 		var downP = controls.DOWN_P;
-		var accepted = controls.ACCEPT;
+		var accepted = FlxG.keys.justPressed.ENTER;
 
 		if (upP)
 		{
@@ -262,6 +219,7 @@ class FreeplayState extends MusicBeatState
 
 		if (accepted)
 		{
+			AGAIN_IN_FREEPLAY = true;
 			var poop:String = Highscore.formatSong(songs[curSelected].songName.toLowerCase(), curDifficulty);
 
 			trace(poop);
@@ -292,11 +250,11 @@ class FreeplayState extends MusicBeatState
 		switch (curDifficulty)
 		{
 			case 0:
-				diffText.text = "<EASY>";
+				diffText.text = "< EASY >";
 			case 1:
-				diffText.text = '<STANDAR>';
+				diffText.text = '< STANDAR >';
 			case 2:
-				diffText.text = "<HARD>";
+				diffText.text = "< HARD >";
 		}
 	}
 
@@ -313,11 +271,8 @@ class FreeplayState extends MusicBeatState
 		if (curSelected >= songs.length)
 			curSelected = 0;
 
-		// selector.y = (70 * curSelected) + 30;
-
 		#if !switch
 		intendedScore = Highscore.getScore(songs[curSelected].songName, curDifficulty);
-		// lerpScore = 0;
 		#end
 
 		#if PRELOAD_ALL
@@ -329,7 +284,8 @@ class FreeplayState extends MusicBeatState
 			BG_COLOR_TWEEN_YE.cancel();
 		}
 
-		BG_COLOR_TWEEN_YE = FlxTween.color(bg, 0.6, bg.color, FlxColor.fromRGB(songs[curSelected].color[0], songs[curSelected].color[1], songs[curSelected].color[2], 255), {
+		BG_COLOR_TWEEN_YE = FlxTween.color(bg, 0.6, bg.color, FlxColor.fromRGB(songs[curSelected].color[0], songs[curSelected].color[1], songs[curSelected].color[2], 255), 
+		{
 			onComplete: function(twn:FlxTween) 
 			{
 				twn = null;
@@ -351,12 +307,10 @@ class FreeplayState extends MusicBeatState
 			bullShit++;
 
 			item.alpha = 0.6;
-			// item.setGraphicSize(Std.int(item.width * 0.8));
 
 			if (item.targetY == 0)
 			{
 				item.alpha = 1;
-				// item.setGraphicSize(Std.int(item.width));
 			}
 		}
 	}
