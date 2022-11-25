@@ -1,5 +1,7 @@
-package;
+package state;
 
+import flixel.tweens.FlxEase;
+import flixel.system.FlxSound;
 import flixel.tweens.FlxTween;
 import flash.text.TextField;
 import flixel.FlxG;
@@ -162,7 +164,9 @@ class FreeplayState extends MusicBeatState
 			songCharacters = ['bf'];
 
 		var num:Int = 0;
+
 		var numC = 0;
+
 		for (song in songs)
 		{
 			addSong(song, weekNum, songCharacters[num], colorsRGB[numC]);
@@ -170,21 +174,32 @@ class FreeplayState extends MusicBeatState
 			if (songCharacters.length != 1)
 				num++;
 
-				if (colorsRGB.length - 1 != 0) 
-				{
+				if (colorsRGB.length != 1) 
 					numC++;
-				}
 		}
 	}
+
+	var soundPlay:String = '';
+
+	var vocals:FlxSound;
 
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
+		// if (FlxG.sound.music.volume < 0.7)
+		// {
+		// 		FlxG.sound.music.volume += 0.5 * FlxG.elapsed;
+		// }
 
-		if (FlxG.sound.music.volume < 0.7)
+		for (i in 0...iconArray.length)
 		{
-			FlxG.sound.music.volume += 0.5 * FlxG.elapsed;
+			iconArray[i].setGraphicSize(Std.int(FlxMath.lerp(150, iconArray[i].width, 0.15)), Std.int(FlxMath.lerp(150, iconArray[i].height, 0.15)));
+			iconArray[i].updateHitbox();
 		}
+
+		FlxG.camera.zoom = FlxMath.lerp(1, FlxG.camera.zoom, 0.95);
+
+		Conductor.songPosition = FlxG.sound.music.time;
 
 		lerpScore = Math.floor(FlxMath.lerp(lerpScore, intendedScore, 0.6));
 
@@ -214,7 +229,7 @@ class FreeplayState extends MusicBeatState
 		if (controls.BACK)
 		{
 			AGAIN_IN_FREEPLAY = true;
-			FlxG.switchState(new MainMenuState());
+			FlxG.switchState(new state.MainMenuState());
 		}
 
 		if (accepted)
@@ -224,13 +239,29 @@ class FreeplayState extends MusicBeatState
 
 			trace(poop);
 
-			PlayState.SONG = Song.loadFromJson(poop, songs[curSelected].songName.toLowerCase());
-			PlayState.isStoryMode = false;
-			PlayState.storyDifficulty = curDifficulty;
+			state.PlayState.SONG = Song.loadFromJson(poop, songs[curSelected].songName.toLowerCase());
+			state.PlayState.isStoryMode = false;
+			state.PlayState.storyDifficulty = curDifficulty;
 
-			PlayState.storyWeek = songs[curSelected].week;
-			trace('CUR WEEK' + PlayState.storyWeek);
-			LoadingState.loadAndSwitchState(new PlayState(), true);
+			state.PlayState.storyWeek = songs[curSelected].week;
+			trace('CUR WEEK' + state.PlayState.storyWeek);
+			state.LoadingState.loadAndSwitchState(new state.PlayState(), true);
+		}
+		if (FlxG.keys.justPressed.SPACE)
+		{
+			if (soundPlay != songs[curSelected].songName)
+			{
+				vocals = new FlxSound().loadEmbedded(Paths.voices(songs[curSelected].songName.toLowerCase()));
+				FlxG.sound.list.add(vocals);
+
+				vocals.volume = 1;
+			}
+			else
+			{
+				vocals.volume = 0;
+			}
+			
+			soundPlay = songs[curSelected].songName;
 		}
 	}
 
@@ -258,7 +289,22 @@ class FreeplayState extends MusicBeatState
 		}
 	}
 
-	var BG_COLOR_TWEEN_YE:FlxTween;
+	override function beatHit()
+	{
+		super.beatHit();
+
+		for (i in 0...iconArray.length)
+		{
+			iconArray[i].setSize(1.2, 1.2);
+			iconArray[i].updateHitbox();
+		}
+		if (curBeat % 4 == 0)
+		{
+			FlxG.camera.zoom += 0.015;
+		}
+	}
+
+	var TweenBGColor:FlxTween;
 
 	function changeSelection(change:Int = 0)
 	{
@@ -275,21 +321,28 @@ class FreeplayState extends MusicBeatState
 		intendedScore = Highscore.getScore(songs[curSelected].songName, curDifficulty);
 		#end
 
-		#if PRELOAD_ALL
 		FlxG.sound.playMusic(Paths.inst(songs[curSelected].songName), 0);
-		#end
 
-		if (BG_COLOR_TWEEN_YE != null)
+		var poop:String = Highscore.formatSong(songs[curSelected].songName.toLowerCase(), curDifficulty);
+		state.PlayState.SONG = Song.loadFromJson(poop, songs[curSelected].songName.toLowerCase());
+
+		Conductor.changeBPM(state.PlayState.SONG.bpm);
+		persistentUpdate = true;
+
+		if (TweenBGColor != null)
 		{
-			BG_COLOR_TWEEN_YE.cancel();
+			TweenBGColor.cancel();
 		}
 
-		BG_COLOR_TWEEN_YE = FlxTween.color(bg, 0.6, bg.color, FlxColor.fromRGB(songs[curSelected].color[0], songs[curSelected].color[1], songs[curSelected].color[2], 255), 
+		TweenBGColor = FlxTween.color(bg, 0.6, bg.color, FlxColor.fromRGB(songs[curSelected].color[0], songs[curSelected].color[1], songs[curSelected].color[2], 255), 
 		{
+			ease: FlxEase.quadInOut,
+
 			onComplete: function(twn:FlxTween) 
 			{
 				twn = null;
 			}
+
 		});
 
 		var bullShit:Int = 0;

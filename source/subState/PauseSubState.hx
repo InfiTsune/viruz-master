@@ -1,5 +1,7 @@
-package;
+package subState;
 
+import state.StoryMenuState;
+import state.PlayState;
 import Controls.Control;
 import flixel.FlxG;
 import flixel.FlxSprite;
@@ -17,7 +19,7 @@ class PauseSubState extends MusicBeatSubstate
 {
 	var grpMenuShit:FlxTypedGroup<Alphabet>;
 
-	var menuItems:Array<String> = ['Resume', 'Restart Song', 'Exit to menu'];
+	var menuItems:Array<String> = ['Continue', 'Restart Song'];
 	var curSelected:Int = 0;
 
 	var pauseMusic:FlxSound;
@@ -25,6 +27,8 @@ class PauseSubState extends MusicBeatSubstate
 	public function new(x:Float, y:Float)
 	{
 		super();
+
+		menuItems.push((state.PlayState.isStoryMode ? "Exit to Story Menu" : "Exit to Freeplay Menu"));
 
 		pauseMusic = new FlxSound().loadEmbedded(Paths.music('breakfast'), true, true);
 		pauseMusic.volume = 0;
@@ -38,7 +42,7 @@ class PauseSubState extends MusicBeatSubstate
 		add(bg);
 
 		var levelInfo:FlxText = new FlxText(20, 15, 0, "", 32);
-		levelInfo.text += PlayState.SONG.song;
+		levelInfo.text += state.PlayState.SONG.song;
 		levelInfo.scrollFactor.set();
 		levelInfo.setFormat(Paths.font("vcr.ttf"), 32);
 		levelInfo.updateHitbox();
@@ -107,8 +111,20 @@ class PauseSubState extends MusicBeatSubstate
 					close();
 				case "Restart Song":
 					FlxG.resetState();
-				case "Exit to menu":
-					FlxG.switchState(new MainMenuState());
+				// case "Exit to menu":
+				// 	FlxG.switchState(new MainMenuState());
+			}
+
+			if (curSelected == menuItems.length - 1)
+			{
+				if (state.PlayState.isStoryMode)
+				{
+					FlxG.switchState(new state.StoryMenuState());
+				}
+				else
+				{
+					FlxG.switchState(new state.FreeplayState());
+				}
 			}
 		}
 

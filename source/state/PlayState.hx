@@ -1,4 +1,4 @@
-package;
+package state;
 
 #if desktop
 import Discord.DiscordClient;
@@ -10,6 +10,10 @@ import flixel.FlxBasic;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxGame;
+import state.FreeplayState;
+import state.StoryMenuState;
+import subState.PauseSubState;
+import subState.GameOverSubstate;
 import flixel.FlxObject;
 import flixel.FlxSprite;
 import flixel.FlxState;
@@ -79,6 +83,7 @@ class PlayState extends MusicBeatState
 
 	private var gfSpeed:Int = 1;
 	private var health:Float = 1;
+	private var song_bar_time:Float = 0;
 	private var combo:Int = 0;
 
 	private var healthBarBG:FlxSprite;
@@ -134,6 +139,9 @@ class PlayState extends MusicBeatState
 	var detailsPausedText:String = "";
 	#end
 
+	private var songTimeBar:FlxBar;
+	var songText:FlxText;
+
 	override public function create()
 	{
 		if (FlxG.sound.music != null)
@@ -147,7 +155,7 @@ class PlayState extends MusicBeatState
 		FlxG.cameras.reset(camGame);
 		FlxG.cameras.add(camHUD);
 
-		FlxCamera.defaultCameras = [camGame];
+		FlxG.cameras.setDefaultDrawTarget = [camGame];
 
 		persistentUpdate = true;
 		persistentDraw = true;
@@ -726,12 +734,26 @@ class PlayState extends MusicBeatState
 		healthBarBG.scrollFactor.set();
 		add(healthBarBG);
 
-		healthBar = new FlxBar(healthBarBG.x + 4, healthBarBG.y + 4, RIGHT_TO_LEFT, Std.int(healthBarBG.width - 8), Std.int(healthBarBG.height - 8), this,
-			'health', 0, 2);
+		healthBar = new FlxBar(healthBarBG.x + 4, healthBarBG.y + 4, RIGHT_TO_LEFT, Std.int(healthBarBG.width - 8), Std.int(healthBarBG.height - 8), this, 'health', 0, 2);
 		healthBar.scrollFactor.set();
 		healthBar.createFilledBar(0xFFFF0000, 0xFF66FF33);
 		// healthBar
 		add(healthBar);
+
+		trace(FlxG.sound.music.endTime);
+
+		songTimeBar = new FlxBar(0, 0, LEFT_TO_RIGHT, 120, 30, this, 'song_bar_time', 0, 1, true);
+		songTimeBar.scrollFactor.set();
+		songTimeBar.createFilledBar(FlxColor.BLACK, FlxColor.YELLOW);
+		songTimeBar.screenCenter(X);
+		songTimeBar.setGraphicSize(Std.int(songTimeBar.width * 3.5), Std.int(songTimeBar.height * 1.1));
+		add(songTimeBar);
+
+		songText = new FlxText(0, 0, 0, "0:00 / 0:00", 16);
+		songText.scrollFactor.set();
+		songText.setFormat(Paths.font("pixel.otf"), 24, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		songText.x = songTimeBar.x / 2 - songTimeBar.width / 2 + songText.width / 2;
+		add(songText);
 
 		scoreTxt = new FlxText(healthBarBG.x + healthBarBG.width - 190, healthBarBG.y + 30, 0, "", 20);
 		scoreTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, RIGHT);
@@ -1346,6 +1368,11 @@ class PlayState extends MusicBeatState
 				iconP1.animation.play('bf-old');
 		}
 
+		song_bar_time = FlxG.sound.music.time / FlxG.sound.music.length;
+		songText.text = FlxStringUtil.formatTime(Math.max(0, Math.floor(FlxG.sound.music.time / 1000)), false) + " / " + FlxStringUtil.formatTime(Math.max(0, Math.floor(FlxG.sound.music.length / 1000)), false);
+
+		songText.x = songTimeBar.x / 2 - songTimeBar.width / 2 + songText.width / 2;
+
 		switch (curStage)
 		{
 			case 'philly':
@@ -1379,7 +1406,7 @@ class PlayState extends MusicBeatState
 				FlxG.switchState(new GitarooPause());
 			}
 			else
-				openSubState(new PauseSubState(boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y));
+				openSubState(new subState.PauseSubState(boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y));
 		
 			#if desktop
 			DiscordClient.changePresence(detailsPausedText, SONG.song + " (" + storyDifficultyText + ")", iconRPC);
@@ -1389,7 +1416,6 @@ class PlayState extends MusicBeatState
 		if (FlxG.keys.justPressed.SEVEN)
 		{
 			FlxG.switchState(new ChartingState());
-
 			#if desktop
 			DiscordClient.changePresence("Chart Editor", null, null, true);
 			#end
@@ -1398,8 +1424,8 @@ class PlayState extends MusicBeatState
 		// FlxG.watch.addQuick('VOL', vocals.amplitudeLeft);
 		// FlxG.watch.addQuick('VOLRight', vocals.amplitudeRight);
 
-		iconP1.setGraphicSize(Std.int(FlxMath.lerp(150, iconP1.width, 0.50)));
-		iconP2.setGraphicSize(Std.int(FlxMath.lerp(150, iconP2.width, 0.50)));
+		iconP1.setGraphicSize(Std.int(FlxMath.lerp(150, iconP1.width, 0.95)), Std.int(FlxMath.lerp(150, iconP1.height, 0.95)));
+		iconP2.setGraphicSize(Std.int(FlxMath.lerp(150, iconP2.width, 0.95)), Std.int(FlxMath.lerp(150, iconP2.height, 0.95)));
 
 		iconP1.updateHitbox();
 		iconP2.updateHitbox();
@@ -1413,14 +1439,14 @@ class PlayState extends MusicBeatState
 			health = 2;
 
 		if (healthBar.percent < 20)
-			iconP1.animation.curAnim.curFrame = 1;
+			iconP1.playAnim('default');
 		else
-			iconP1.animation.curAnim.curFrame = 0;
+			iconP1.playAnim('lose');
 
 		if (healthBar.percent > 80)
-			iconP2.animation.curAnim.curFrame = 1;
+			iconP2.playAnim('lose');
 		else
-			iconP2.animation.curAnim.curFrame = 0;
+			iconP2.playAnim('default');
 
 		/* if (FlxG.keys.justPressed.NINE)
 			FlxG.switchState(new Charting()); */
@@ -1570,7 +1596,7 @@ class PlayState extends MusicBeatState
 		// CHEAT = brandon's a pussy
 		if (controls.CHEAT)
 		{
-			health += 1;
+			health = 0;
 			trace("User is cheating!");
 		}
 
@@ -1770,7 +1796,7 @@ class PlayState extends MusicBeatState
 				PlayState.SONG = Song.loadFromJson(PlayState.storyPlaylist[0].toLowerCase() + difficulty, PlayState.storyPlaylist[0]);
 				FlxG.sound.music.stop();
 
-				LoadingState.loadAndSwitchState(new PlayState());
+				state.LoadingState.loadAndSwitchState(new PlayState());
 			}
 		}
 		else

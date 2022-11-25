@@ -1,4 +1,4 @@
-package source;
+package state;
 
 import flixel.FlxSprite;
 import flixel.FlxG;
@@ -12,10 +12,12 @@ class PlayerSelect extends MusicBeatState
 {
     var player:Boyfriend;
 
-    var thePlayers:Array<String> = [
+    var playersOpt:Array<String> = 
+    [
         ["bf", "bf-pixel"],
         ['pico']
     ];
+
     private static var curPlayer:Int;
     private static var curStyle:Int;
 
@@ -32,7 +34,7 @@ class PlayerSelect extends MusicBeatState
         bg.setGraphicSize(Std.int(bg.width * 1.2));
         add(bg);
 
-        player = new Boyfriend(0, 0, thePlayers[curPlayer][curStyle]);
+        player = new Boyfriend(0, 0, playersOpt[curPlayer][curStyle]);
         add(player);
 
         Conductor.changeBPM(102);
@@ -42,21 +44,21 @@ class PlayerSelect extends MusicBeatState
         selector = FlxTypedGroup<FlxSprite>();
         add(selector);
 
-        var leftArrow = new FlxSprite(player.x - player.height - 30);
-		leftArrow.frames = ui_tex;
-		leftArrow.animation.addByPrefix('idle', "arrow left");
-		leftArrow.animation.addByPrefix('press', "arrow push left");
-		leftArrow.animation.play('idle');
-        leftArrow.ID = 0;
-		selectors.add(leftArrow);
+        // var leftArrow = new FlxSprite(player.x - player.height - 30);
+		// leftArrow.frames = ui_tex;
+		// leftArrow.animation.addByPrefix('idle', "arrow left");
+		// leftArrow.animation.addByPrefix('press', "arrow push left");
+		// leftArrow.animation.play('idle');
+        // leftArrow.ID = 0;
+		// selectors.add(leftArrow);
 
-		var rightArrow = new FlxSprite(player.x + player.height + 30);
-		rightArrow.frames = ui_tex;
-		rightArrow.animation.addByPrefix('idle', 'arrow right');
-		rightArrow.animation.addByPrefix('press', "arrow push right", 24, false);
-		rightArrow.animation.play('idle');
-        rightArrow.ID = 1;
-		selectors.add(rightArrow);
+		// var rightArrow = new FlxSprite(player.x + player.height + 30);
+		// rightArrow.frames = ui_tex;
+		// rightArrow.animation.addByPrefix('idle', 'arrow right');
+		// rightArrow.animation.addByPrefix('press', "arrow push right", 24, false);
+		// rightArrow.animation.play('idle');
+        // rightArrow.ID = 1;
+		// selectors.add(rightArrow);
 
         textAlphabet = new Alphabet(-20, 20, "Select Player" + "\npress left or right to change player" + "\npress up or down to change player style", true);
         textAlphabet.setGraphicSize(Std.int(textAlphabet.width * 0.8));
@@ -108,65 +110,83 @@ class PlayerSelect extends MusicBeatState
 
                 new FlxTimer().start(1, function(tmr:FlxTimer)
                 {
-                    PlayState.boyfriend = thePlayers[curPlayer][curStyle];
-                    LoadingState.loadAndSwitchState(new PlayState());
+                    state.PlayState.boyfriend = playersOpt[curPlayer][curStyle];
+                    LoadingState.loadAndSwitchState(new state.PlayState());
                 });
             }
 
-            if (controls.LEFT_P)
-            {
-                player.playAnim('singLEFT', true);
-            }
-            if (controls.DOWN_P)
-            {
-                player.playAnim('singDOWN', true);
-            }
-            if (controls.UP_P)
-            {
-                player.playAnim('singUP', true);
-            }
-            if (controls.RIGHT_P)
-            {
-                player.playAnim('singRIGHT', true);
-            }
+            KeyS();
         }
 
         player.screenCenter(X);
 
-        selector.forEach(function(s:FlxSprite)
+        // selector.forEach(function(sprite:FlxSprite)
+        // {
+        //     if (sprite.ID = 0)
+        //     {
+        //         sprite.x = player.x - player.height - 30;
+        //     }
+        //     else
+        //     {
+        //         sprite.x = player.x + player.height + 30;
+        //     }
+        // });
+    }
+
+    private function KeyS()
+    {
+        left = controls.LEFT_P;
+        down = controls.DOWN_P;
+        up = controls.UP_P;
+        right = controls.RIGHT_P;
+
+        if (left)
         {
-            if (s.ID = 0)
+            player.playAnim('singLEFT', true);
+        }
+        if (down)
+        {
+            player.playAnim('singDOWN', true);
+        }
+        if (up)
+        {
+            player.playAnim('singUP', true);
+        }
+        if (right)
+        {
+            player.playAnim('singRIGHT', true);
+        }
+
+        if (boyfriend.holdTimer > Conductor.stepCrochet * 4 * 0.001 && !up && !down && !right && !left)
+        {
+            if (boyfriend.animation.curAnim.name.startsWith('sing') && !boyfriend.animation.curAnim.name.endsWith('miss'))
             {
-                s.x = player.x - player.height - 30;
+                boyfriend.playAnim('idle');
             }
-            else
-            {
-                s.x = player.x + player.height + 30;
-            }
-        });
+        }
     }
 
     override function beatHit()
     {
         super.beatHit();
 
-        if (!boyfriend.animation.curAnim.name.startsWith("sing") && curBeat % 4 = 0)
-        {
-            boyfriend.playAnim('idle');
-        }
+        // if (!boyfriend.animation.curAnim.name.startsWith("sing") && curBeat % 4 == 0)
+        // {
+        //     boyfriend.playAnim('idle');
+        // }
     }
 
     function changePlayer(PLAYER_SELECTED:Int = 0):Void
     {
         curPlayer += PLAYER_SELECTED;
 
-        if (curPlayer >= thePlayers.length - 1)
+        if (curPlayer >= playersOpt.length - 1)
         {
             curPlayer = 0;
         }
         if (curPlayer < 0)
         {
-            curPlayer = thePlayers.length - 1;
+            curPlayer = playersOpt.length - 1;
         }
 
         changeStyle();
@@ -176,13 +196,13 @@ class PlayerSelect extends MusicBeatState
     {
         curStyle += STYLE;
 
-        if (curStyle >= thePlayers[curPlayer].length - 1)
+        if (curStyle >= playersOpt[curPlayer].length - 1)
         {
             curStyle = 0;
         }
         if (curStyle < 0)
         {
-            curStyle = thePlayers[curPlayer].length - 1;
+            curStyle = playersOpt[curPlayer].length - 1;
         }
 
         changeSprite();
@@ -192,7 +212,7 @@ class PlayerSelect extends MusicBeatState
     {
         remove(player);
 
-        player = new Boyfriend(0, 0, thePlayers[curPlayer][curStyle]);
+        player = new Boyfriend(0, 0, playersOpt[curPlayer][curStyle]);
         player.alpha = 0;
         player.y = FlxG.height * 0.75;
 

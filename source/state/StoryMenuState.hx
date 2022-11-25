@@ -1,4 +1,4 @@
-package;
+package state;
 
 #if desktop
 import Discord.DiscordClient;
@@ -281,7 +281,7 @@ class StoryMenuState extends MusicBeatState
 		{
 			FlxG.sound.play(Paths.sound('cancelMenu'));
 			movedBack = true;
-			FlxG.switchState(new MainMenuState());
+			FlxG.switchState(new state.MainMenuState());
 		}
 
 		super.update(elapsed);
@@ -304,8 +304,8 @@ class StoryMenuState extends MusicBeatState
 				stopspamming = true;
 			}
 
-			PlayState.storyPlaylist = weekData[curWeek];
-			PlayState.isStoryMode = true;
+			state.PlayState.storyPlaylist = weekData[curWeek];
+			state.PlayState.isStoryMode = true;
 			selectedWeek = true;
 
 			var diffic = "";
@@ -318,14 +318,14 @@ class StoryMenuState extends MusicBeatState
 					diffic = '-hard';
 			}
 
-			PlayState.storyDifficulty = curDifficulty;
+			state.PlayState.storyDifficulty = curDifficulty;
 
-			PlayState.SONG = Song.loadFromJson(PlayState.storyPlaylist[0].toLowerCase() + diffic, PlayState.storyPlaylist[0].toLowerCase());
-			PlayState.storyWeek = curWeek;
-			PlayState.campaignScore = 0;
+			state.PlayState.SONG = Song.loadFromJson(state.PlayState.storyPlaylist[0].toLowerCase() + diffic, state.PlayState.storyPlaylist[0].toLowerCase());
+			state.PlayState.storyWeek = curWeek;
+			state.PlayState.campaignScore = 0;
 			new FlxTimer().start(1, function(tmr:FlxTimer)
 			{
-				LoadingState.loadAndSwitchState(new PlayState(), true);
+				state.LoadingState.loadAndSwitchState(new state.PlayState(), true);
 			});
 		}
 	}

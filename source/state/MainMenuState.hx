@@ -1,4 +1,4 @@
-package;
+package state;
 
 #if desktop
 import Discord.DiscordClient;
@@ -149,7 +149,12 @@ class MainMenuState extends MusicBeatState
 
 			if (controls.BACK)
 			{
-				FlxG.switchState(new TitleState());
+				FlxG.switchState(new state.TitleState());
+			}
+
+			if (FlxG.keys.justPressed.R)
+			{
+				Application.current.window.title = 'TU MAMA'; // Test
 			}
 
 			if (controls.ACCEPT)
@@ -190,17 +195,15 @@ class MainMenuState extends MusicBeatState
 								switch (daChoice)
 								{
 									case 'story mode':
-										FlxG.switchState(new StoryMenuState());
+										FlxG.switchState(new state.StoryMenuState());
 										trace("Story Menu Selected");
 									case 'freeplay':
-										FlxG.switchState(new FreeplayState());
-
+										FlxG.switchState(new state.FreeplayState());
 										trace("Freeplay Menu Selected");
-
 									case 'options':
 										FlxTransitionableState.skipNextTransIn = true;
 										FlxTransitionableState.skipNextTransOut = true;
-										FlxG.switchState(new OptionsMenu());
+										FlxG.switchState(new options.OptionsMenu());
 								}
 							});
 						}
@@ -217,7 +220,7 @@ class MainMenuState extends MusicBeatState
 		});
 	}
 
-	function changeItem(huh:Int = 0)
+	function changeItem(huh:Int = 0):Void
 	{
 		curSelected += huh;
 
